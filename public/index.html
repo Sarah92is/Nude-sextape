@@ -738,8 +738,9 @@
     <div id="videoPlayer" class="video-player">
         <button class="video-close-btn" onclick="closeVideoPlayer()">✕</button>
         <div class="video-player-content">
-            <video id="mainVideo" controls autoplay crossorigin="anonymous">
+            <video id="mainVideo" controls autoplay crossorigin="anonymous" style="width: 100%; height: 100%; background: #000;">
                 <source id="videoSource" type="video/mp4">
+                <source id="videoSourceWebm" type="video/webm">
                 Votre navigateur ne supporte pas le lecteur vidéo.
             </video>
         </div>
@@ -1098,10 +1099,14 @@
         async function loadVideos() {
             try {
                 const response = await fetch(`${API_URL}/api/videos`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
+                console.log('Vidéos chargées:', data.videos);
                 displayVideos(data.videos || []);
             } catch (error) {
-                console.log('Erreur lors du chargement des vidéos');
+                console.error('Erreur lors du chargement des vidéos:', error);
             }
         }
 
@@ -1146,8 +1151,13 @@
             const player = document.getElementById('videoPlayer');
             const video = document.getElementById('mainVideo');
             const source = document.getElementById('videoSource');
+            const sourceWebm = document.getElementById('videoSourceWebm');
+            
             source.src = `${API_URL}${videoPath}`;
+            sourceWebm.src = '';
+            
             video.load();
+            video.play().catch(err => console.log('Erreur lecture:', err));
             player.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -1156,8 +1166,11 @@
             const player = document.getElementById('videoPlayer');
             const video = document.getElementById('mainVideo');
             const source = document.getElementById('videoSource');
+            const sourceWebm = document.getElementById('videoSourceWebm');
+            
             video.pause();
             source.src = '';
+            sourceWebm.src = '';
             video.load();
             player.classList.remove('active');
             document.body.style.overflow = 'auto';

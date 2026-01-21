@@ -28,10 +28,18 @@
       "dest": "/api/videos.js"
     },
     {
+      "src": "/api/video",
+      "dest": "/api/video.js"
+    },
+    {
       "src": "/videos/(.*)",
       "dest": "/public/videos/$1",
       "headers": {
-        "Cache-Control": "public, max-age=3600"
+        "Cache-Control": "public, max-age=3600",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Range",
+        "Accept-Ranges": "bytes"
       }
     },
     {
