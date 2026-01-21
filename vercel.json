@@ -39,5 +39,5 @@
       "dest": "/public/index.html"
     }
   ],
-  "public": "public"
+  "public": true
 }
