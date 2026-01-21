@@ -1,4 +1,4 @@
-jai{
+{
   "buildCommand": "npm install",
   "functions": {
     "api/signup.js": {
