@@ -2,10 +2,10 @@
   "name": "prenium-acess",
   "version": "1.0.0",
   "description": "Plateforme d'inscription premium exclusive",
-  "main": "server.js",
+  "main": "api/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node api/server.js",
+    "dev": "node api/server.js"
   },
   "keywords": ["premium", "invitation"],
   "author": "",

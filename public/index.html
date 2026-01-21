@@ -690,6 +690,8 @@
             font-size: 18px;
             margin-bottom: 10px;
         }
+
+        /* Responsive */
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -861,7 +863,15 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000';
+        // Détecter si on est sur Vercel ou en local
+        const getAPIURL = () => {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'http://localhost:3000';
+            }
+            return window.location.origin;
+        };
+
+        const API_URL = getAPIURL();
 
         // Génération des particules d'arrière-plan
         function createParticles() {
@@ -1081,13 +1091,6 @@
             }
         }
 
-        // Initialisation
-        window.addEventListener('DOMContentLoaded', () => {
-            createParticles();
-            checkCurrentUser();
-            loadVideos();
-        });
-
         // Gestion des vidéos
         async function loadVideos() {
             try {
@@ -1139,7 +1142,7 @@
         function playVideo(videoPath, videoName) {
             const player = document.getElementById('videoPlayer');
             const video = document.getElementById('mainVideo');
-            video.src = `${API_URL}/${videoPath}`;
+            video.src = `${API_URL}${videoPath}`;
             player.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -1172,6 +1175,13 @@
             if (e.key === 'Escape') {
                 closeVideoPlayer();
             }
+        });
+
+        // Initialisation
+        window.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            checkCurrentUser();
+            loadVideos();
         });
     </script>
 </body>

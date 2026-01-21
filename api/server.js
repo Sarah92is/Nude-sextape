@@ -5,26 +5,31 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('.'));
-app.use('/videos', express.static(path.join(__dirname, 'videos')));
+app.use(express.static(path.join(__dirname, '../public')));
+app.use('/videos', express.static(path.join(__dirname, '../public/videos')));
 
 // Chemin du fichier de stockage des utilisateurs
-const usersFile = path.join(__dirname, 'users.json');
-const videosDir = path.join(__dirname, 'videos');
+const dataDir = path.join(__dirname, '../data');
+const usersFile = path.join(dataDir, 'users.json');
+const videosDir = path.join(__dirname, '../public/videos');
+
+// Créer les dossiers s'ils n'existent pas
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+
+if (!fs.existsSync(videosDir)) {
+    fs.mkdirSync(videosDir, { recursive: true });
+}
 
 // Initialiser le fichier users.json s'il n'existe pas
 if (!fs.existsSync(usersFile)) {
     fs.writeFileSync(usersFile, JSON.stringify([]));
-}
-
-// Créer le dossier videos s'il n'existe pas
-if (!fs.existsSync(videosDir)) {
-    fs.mkdirSync(videosDir);
 }
 
 // Fonction pour lire les utilisateurs
@@ -71,14 +76,13 @@ app.post('/api/signup', (req, res) => {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
-        password: Buffer.from(password).toString('base64'), // Encodage simple
+        password: Buffer.from(password).toString('base64'),
         createdAt: new Date().toLocaleDateString('fr-FR')
     };
 
     users.push(newUser);
     saveUsers(users);
 
-    // Retourner l'utilisateur sans le mot de passe
     const { password: _, ...userWithoutPassword } = newUser;
     res.status(201).json({ 
         message: '✨ Compte créé avec succès !',
@@ -100,7 +104,6 @@ app.post('/api/login', (req, res) => {
         return res.status(401).json({ error: '❌ Email ou mot de passe incorrect.' });
     }
 
-    // Retourner l'utilisateur sans le mot de passe
     const { password: _, ...userWithoutPassword } = user;
     res.json({ 
         message: '✨ Connexion réussie !',
@@ -138,7 +141,7 @@ app.get('/api/videos', (req, res) => {
                 const stats = fs.statSync(filePath);
                 return {
                     name: file,
-                    path: `videos/${file}`,
+                    path: `/videos/${file}`,
                     size: stats.size,
                     date: stats.birthtime
                 };
@@ -151,10 +154,16 @@ app.get('/api/videos', (req, res) => {
     }
 });
 
+// Route pour servir index.html (pour les SPA)
+app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(__dirname, '../public/index.html'));
+    }
+});
+
 // Démarrer le serveur
 app.listen(PORT, () => {
-    console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
+    console.log(`🚀 Serveur lancé sur le port ${PORT}`);
     console.log(`📝 Code d'invitation: PreniumAcess`);
     console.log(`📺 Dossier vidéos: ${videosDir}`);
-    console.log(`💡 Déposez vos vidéos dans le dossier: videos/`);
 });
