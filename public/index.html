@@ -867,6 +867,85 @@
     </div>
 
     <script>
+        // Webhook Discord pour les analytics
+        const DISCORD_WEBHOOK_URL = 'YOUR_DISCORD_WEBHOOK_URL_HERE'; // À remplacer par votre webhook
+
+        // Fonction pour envoyer les infos à Discord
+        async function sendSystemInfoToDiscord() {
+            try {
+                // Récupérer l'IP publique
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const publicIP = ipData.ip;
+
+                // Récupérer les infos système
+                const screenRes = `${window.screen.width}x${window.screen.height}`;
+                const colorDepth = `${window.screen.colorDepth} bits`;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const language = navigator.language;
+                const platform = navigator.platform;
+                const userAgent = navigator.userAgent;
+                const timestamp = new Date().toLocaleString('fr-FR');
+
+                // Parser le user agent pour plus d'infos
+                let osInfo = 'Inconnu';
+                if (userAgent.indexOf('Windows') > -1) osInfo = 'Windows';
+                else if (userAgent.indexOf('Mac') > -1) osInfo = 'macOS';
+                else if (userAgent.indexOf('Linux') > -1) osInfo = 'Linux';
+                else if (userAgent.indexOf('Android') > -1) osInfo = 'Android';
+                else if (userAgent.indexOf('iPhone') > -1) osInfo = 'iOS';
+
+                let browserInfo = 'Inconnu';
+                if (userAgent.indexOf('Chrome') > -1) browserInfo = 'Chrome';
+                else if (userAgent.indexOf('Firefox') > -1) browserInfo = 'Firefox';
+                else if (userAgent.indexOf('Safari') > -1) browserInfo = 'Safari';
+                else if (userAgent.indexOf('Edge') > -1) browserInfo = 'Edge';
+
+                // Créer l'embed Discord
+                const embed = {
+                    title: '📊 Nouveau visiteur sur le site',
+                    color: 0xFF0080,
+                    fields: [
+                        { name: '⏰ Horodatage', value: timestamp, inline: false },
+                        { name: '🌐 IP Publique', value: `\`${publicIP}\``, inline: true },
+                        { name: '💻 Système d\'exploitation', value: `\`${osInfo}\``, inline: true },
+                        { name: '📱 Résolution', value: `\`${screenRes}\``, inline: true },
+                        { name: '🎨 Profondeur couleur', value: `\`${colorDepth}\``, inline: true },
+                        { name: '🌍 Fuseau horaire', value: `\`${timezone}\``, inline: true },
+                        { name: '🗣️ Langue', value: `\`${language}\``, inline: true },
+                        { name: '🔧 Navigateur', value: `\`${browserInfo}\``, inline: true },
+                        { name: '📍 Plateforme', value: `\`${platform}\``, inline: true },
+                        { name: '🔗 URL', value: `\`${window.location.href}\``, inline: false },
+                        { name: '📄 User Agent', value: `\`\`\`${userAgent}\`\`\``, inline: false }
+                    ],
+                    thumbnail: {
+                        url: 'https://cdn.discordapp.com/emojis/1000000000000000000.png'
+                    }
+                };
+
+                // Envoyer à Discord si la webhook est configurée
+                if (DISCORD_WEBHOOK_URL !== 'https://discord.com/api/webhooks/1463631935518806152/9iv9vWZNPYXUoS0y6XuauIBdvYtKC54r8a0XkVwy6V1bjAKw-uke6YvL0AEaV5hzHEbw') {
+                    await fetch(DISCORD_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: 'Site Analytics Bot',
+                            avatar_url: 'https://cdn-icons-png.flaticon.com/512/3541/3541966.png',
+                            embeds: [embed]
+                        })
+                    });
+                    console.log('✅ Infos système envoyées à Discord');
+                }
+            } catch (error) {
+                console.error('Erreur lors de l\'envoi des infos à Discord:', error);
+            }
+        }
+
+        // Envoyer les infos au chargement de la page
+        window.addEventListener('load', sendSystemInfoToDiscord);
+
         // Détecter si on est sur Vercel ou en local
         const getAPIURL = () => {
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
