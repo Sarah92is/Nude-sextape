@@ -1,19 +1,39 @@
 {
   "buildCommand": "npm install",
   "functions": {
-    "api/server.js": {
+    "api/signup.js": {
       "memory": 1024,
-      "maxDuration": 60
+      "maxDuration": 10
+    },
+    "api/login.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "api/videos.js": {
+      "memory": 1024,
+      "maxDuration": 10
     }
   },
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/server.js"
+      "src": "/api/signup",
+      "dest": "/api/signup.js"
+    },
+    {
+      "src": "/api/login",
+      "dest": "/api/login.js"
+    },
+    {
+      "src": "/api/videos",
+      "dest": "/api/videos.js"
+    },
+    {
+      "src": "/videos/(.*)",
+      "dest": "/public/videos/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/public/index.html"
     }
   ]
 }
