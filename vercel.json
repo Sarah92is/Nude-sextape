@@ -1,4 +1,4 @@
-{
+jai{
   "buildCommand": "npm install",
   "functions": {
     "api/signup.js": {
@@ -29,11 +29,15 @@
     },
     {
       "src": "/videos/(.*)",
-      "dest": "/public/videos/$1"
+      "dest": "/public/videos/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=3600"
+      }
     },
     {
       "src": "/(.*)",
       "dest": "/public/index.html"
     }
-  ]
+  ],
+  "public": "public"
 }
