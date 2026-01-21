@@ -1153,11 +1153,14 @@
             const source = document.getElementById('videoSource');
             const sourceWebm = document.getElementById('videoSourceWebm');
             
-            source.src = `${API_URL}${videoPath}`;
+            // Encoder le chemin pour les caractères spéciaux (accents, espaces, etc.)
+            const encodedPath = videoPath.split('/').map(part => encodeURIComponent(part)).join('/');
+            source.src = `${API_URL}${encodedPath}`;
             sourceWebm.src = '';
             
+            console.log('Lecture vidéo:', source.src);
             video.load();
-            video.play().catch(err => console.log('Erreur lecture:', err));
+            video.play().catch(err => console.error('Erreur lecture:', err));
             player.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
