@@ -1153,9 +1153,9 @@
             const source = document.getElementById('videoSource');
             const sourceWebm = document.getElementById('videoSourceWebm');
             
-            // Encoder le chemin pour les caractères spéciaux (accents, espaces, etc.)
-            const encodedPath = videoPath.split('/').map(part => encodeURIComponent(part)).join('/');
-            source.src = `${API_URL}${encodedPath}`;
+            // Construire l'URL correctement
+            // videoPath est déjà: /videos/filename
+            source.src = `${window.location.origin}${videoPath}`;
             sourceWebm.src = '';
             
             console.log('Lecture vidéo:', source.src);

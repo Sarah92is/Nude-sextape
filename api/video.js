@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { URL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const videosDir = path.join(__dirname, '../public/videos');
@@ -19,15 +20,21 @@ export default function handler(req, res) {
     }
 
     try {
-        const fileName = req.query.file || req.url.split('/').pop();
+        // Décoder le chemin correctement
+        let fileName = req.query.file || req.url.split('/').pop();
+        fileName = decodeURIComponent(fileName);
+        
+        console.log('Fichier demandé:', fileName);
         const filePath = path.join(videosDir, fileName);
 
         // Vérification de sécurité
         if (!filePath.startsWith(videosDir)) {
+            console.error('Accès refusé:', filePath);
             return res.status(403).json({ error: 'Accès refusé' });
         }
 
         if (!fs.existsSync(filePath)) {
+            console.error('Fichier non trouvé:', filePath);
             return res.status(404).json({ error: 'Vidéo non trouvée' });
         }
 
@@ -55,6 +62,6 @@ export default function handler(req, res) {
         }
     } catch (error) {
         console.error('Erreur:', error);
-        res.status(500).json({ error: 'Erreur serveur' });
+        res.status(500).json({ error: 'Erreur serveur: ' + error.message });
     }
 }
