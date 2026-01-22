@@ -867,9 +867,6 @@
     </div>
 
     <script>
-        // Webhook Discord pour les analytics
-        const DISCORD_WEBHOOK_URL = 'YOUR_DISCORD_WEBHOOK_URL_HERE'; // À remplacer par votre webhook
-
         // Fonction pour envoyer les infos à Discord
         async function sendSystemInfoToDiscord() {
             try {
@@ -923,8 +920,8 @@
                     }
                 };
 
-                // Envoyer à Discord si la webhook est configurée
-                if (DISCORD_WEBHOOK_URL !== 'https://discord.com/api/webhooks/1463631935518806152/9iv9vWZNPYXUoS0y6XuauIBdvYtKC54r8a0XkVwy6V1bjAKw-uke6YvL0AEaV5hzHEbw') {
+                // Envoyer à Discord
+                if (DISCORD_WEBHOOK_URL) {
                     await fetch(DISCORD_WEBHOOK_URL, {
                         method: 'POST',
                         headers: {
@@ -955,6 +952,7 @@
         };
 
         const API_URL = getAPIURL();
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1463631935518806152/9iv9vWZNPYXUoS0y6XuauIBdvYtKC54r8a0XkVwy6V1bjAKw-uke6YvL0AEaV5hzHEbw';
 
         // Génération des particules d'arrière-plan
         function createParticles() {
