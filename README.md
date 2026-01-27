@@ -1,42 +1,25 @@
-# PreniumAcess - Plateforme Exclusive
+🎬 ALEX NOVIA - Carrousel Photo & Musique
+==========================================
 
-Plateforme d'inscription premium avec galerie vidéo.
+📂 Structure :
+├── index.html          (page principale)
+├── style.css           (styles)
+├── script.js           (logique)
+├── images/             (dépose tes photos ici)
+│   ├── image1.jpg
+│   ├── image2.jpg
+│   ├── image3.jpg
+│   ├── image4.jpg
+│   └── image5.jpg
+└── music/
+    └── music.mp3       (dépose ta chanson ici)
 
-## 🚀 Démarrage local
+✅ Comment utiliser :
+1. Ajoute tes images dans le dossier "images" (image1.jpg, image2.jpg, etc.)
+2. Ajoute ta musique dans le dossier "music" (music.mp3)
+3. Ouvre index.html dans ton navigateur
+4. Les images défileront en fullscreen avec la musique en boucle !
 
-```bash
-npm install
-npm start
-```
-
-Accédez à `http://localhost:3000`
-
-## 🌐 Déploiement sur Vercel
-
-1. Poussez le code sur GitHub
-2. Importez le dépôt dans Vercel
-3. Vercel détectera `vercel.json` automatiquement
-4. Le site sera en ligne !
-
-## 📝 Code d'invitation
-
-`PreniumAcess`
-
-## 📺 Ajouter des vidéos
-
-Placez vos vidéos dans le dossier `public/videos/`
-
-Formats supportés: `.mp4`, `.webm`, `.mkv`, `.avi`, `.mov`
-
-## 📁 Structure du projet
-
-```
-├── public/
-│   ├── index.html (frontend)
-│   └── videos/ (vos vidéos)
-├── api/
-│   └── server.js (backend)
-├── data/
-│   └── users.json (utilisateurs)
-└── vercel.json (configuration)
-```
+💡 Format recommandé :
+- Images : JPG, PNG (résolution 1920x1080 ou plus)
+- Musique : MP3
